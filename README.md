@@ -7,6 +7,11 @@ python 3.11
 pip install -r requirements.txt
 ```
 
+## Test
+```
+pytest main.py -s
+```
+
 ### Optional: Enable Rival Search (for boosting MFE-based metrics)
 To enable structure-level rival search, download and build the RNA-Undesign repository:
 
