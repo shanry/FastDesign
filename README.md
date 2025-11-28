@@ -23,9 +23,41 @@ export PATH_UNDESIGN=path/to/RNA-Undesign
 ```
 
 ## Experiment Replication
+To begin, navigate to the repository directory:
 ```
 cd FastDesign/
 ```
+
+### Main Parameters
+
+The primary command-line parameters are:
+
+- **`--path`**:  
+  Path to the input file containing target RNA secondary structures, one structure per line.  
+  Examples: `data/rnasolo764.txt`, `data/eterna100.txt`.
+
+- **`--step`**:  
+  Number of optimization steps for leaf-node (motif-level) design. Default: **5000**.
+
+- **`--poststep`**:  
+  Number of optimization steps for root-node (full-structure) refinement. A flexible parameter that balances quality and efficiency.
+  Default values:  
+  • **0** for the *fast* version  
+  • **2500** for the *full* version
+
+- **`--repeat`**:  
+  Number of repeated experiments to run. Default: **1**.
+
+- **`--worker_count`**:  
+  Number of CPU cores to use for parallel execution.
+
+- **`--batch_size`**:  
+  Number of structures processed in parallel per batch. Must be **≥ `worker_count`**.
+
+- **`--k_prune`**:  
+  Beam size for cubic pruning. For each node, the top `k_prune` candidate designs are retained during search.
+
+
 
 ### Fast Version
 Run
