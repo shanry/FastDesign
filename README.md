@@ -22,13 +22,7 @@ Then set the environment variable PATH_UNDESIGN:
 export PATH_UNDESIGN=path/to/RNA-Undesign
 ```
 
-## Experiment Replication
-To begin, navigate to the repository directory:
-```
-cd FastDesign/
-```
-
-### Main Parameters
+## Main Parameters
 
 The primary command-line parameters are:
 
@@ -57,7 +51,11 @@ The primary command-line parameters are:
 - **`--k_prune`**:  
   Beam size for cubic pruning. For each node, the top `k_prune` candidate designs are retained during search.
 
-
+## Experiment Replication
+To begin, navigate to the repository directory:
+```
+cd FastDesign/
+```
 
 ### Fast Version
 Run
