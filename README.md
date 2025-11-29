@@ -52,7 +52,8 @@ The primary command-line parameters are:
   Beam size for cubic pruning. For each node, the top `k_prune` candidate designs are retained during search.
 
 ## Experiment Replication
-The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip, Eterna100_fast.zip) are available at: https://drive.google.com/drive/u/0/folders/12A2PhjEMSfbsqS9-matxi5O9RDWBVr2g.  \
+The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip, Eterna100_fast.zip) are available at: https://drive.google.com/drive/u/0/folders/12A2PhjEMSfbsqS9-matxi5O9RDWBVr2g.
+
 To begin, navigate to the repository directory:
 ```
 cd FastDesign/
