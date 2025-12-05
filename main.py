@@ -1351,6 +1351,35 @@ def test_design():
     assert seq == "AGAAACGGCCCAAGGACCGAACUGAAGGUCCAAGCGAGCCAGCGCCGAAAAGGCGCAGCCCUCAUGGGCAGGCCGCAAGGGUGGGAAAAAAAAAAGAAAAGAGA", f"seq is not right: {seq}"
 
 
+def online_design(structure):
+    k_best, log, mfe_list, umfe_list, dist_best, ned_best, prob_best, elapsed_time = design_pipeline("test", structure, seed=seed_np)
+    print("k_best:", k_best)
+    ned_best = float(ned_best[0]), ned_best[1]
+    prob_best = float(1 - prob_best[0]), prob_best[1]
+    results = {
+                "target": structure,
+                "mfe_list": mfe_list,
+                "umfe_list": umfe_list,
+                "ned_best": ned_best,
+                "prob_best": prob_best,
+                "dist_best": dist_best,
+                "time": elapsed_time
+            }
+    print("design results:")
+    for key, value in results.items():
+        if "list" in key:
+            # print count
+            print(f"size of {key}: {len(value)}")
+        else:
+            print(f"{key}: {value}")
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    id_random = random.randint(0, int(1e7))
+    filename = f"results_{timestamp}_{id_random}.json"
+    with open(filename, "w") as f:
+        json.dump(results, f)
+    print(f"Results saved to {filename}")
+
+
 def configure_global():
     global seed_np
     seed_np = 2020
@@ -1386,8 +1415,8 @@ def configure_global():
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", "-p", type=str, default="")
-    parser.add_argument("--object", "-o", type=str, default="pd")
+    parser.add_argument("-p", "--path", type=str, default="")
+    parser.add_argument("-b", "--object", type=str, default="pd")
     # parameters inherited from samfeo, should be fixed
     parser.add_argument("--k", type=int, default=10)  # size of frontier for samfeo algorithm
     parser.add_argument("--t", type=float, default=1)  # temperature for mutation
@@ -1409,13 +1438,19 @@ if __name__ == "__main__":
     parser.add_argument("--repeat", type=int, default=1)
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--log", action="store_true")
-    parser.add_argument("--online", action="store_true")
+    parser.add_argument("-o", "--online", action="store_true")
 
     args = parser.parse_args()
     print("args:")
     print(args)
 
     configure_global()
+
+    if args.online:
+        print("online mode:")
+        for line in sys.stdin:
+            target = line.strip()
+            online_design(structure=target)
 
     if args.path:
         time_str = time.strftime("%Y%m%d_%H%M%S")

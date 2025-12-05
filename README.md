@@ -22,6 +22,15 @@ Then set the environment variable PATH_UNDESIGN:
 export PATH_UNDESIGN=path/to/RNA-Undesign
 ```
 
+## Run from the Command Line
+```
+echo ".((((((((((..((((......((((((((.......)))))))).(((..(((((.....)))).)..)))))))....))))))))))" | python main.py --online  # fast version
+```
+or
+```
+echo ".((((((((((..((((......((((((((.......)))))))).(((..(((((.....)))).)..)))))))....))))))))))" | python main.py --online --poststep 2500  # full version
+```
+
 ## Main Parameters
 
 The primary command-line parameters are:
