@@ -76,14 +76,14 @@ BATCH_SIZE = 20
 
 
 # global parameters for input and output
-path_motifs = "data/easy_motifs.txt"
-size_motifs = 3
-selected_motifs = None
+PATH_MOTIFS = "data/easy_motifs.txt"  # path to easy-to-design motifs
+SIZE_MOTIFS = 3  # minimum size of motifs to consider
+MOTIFS_SELECTED = None  # selected motifs to be used for structure decomposition
 OUTPUT_DIR = None
 META_DATA = dict()
 
 # global random seed
-seed_np = None
+SEED_RANDOM = None
 
 
 class RNAStructure:
@@ -393,9 +393,6 @@ def samfeo(
     print(f"target structure: {target}")
     print(f"constraint\t: {constraint}")
     start_time = time.time()
-    # global seed_np
-    # np.random.seed(seed_np)
-    # print(f'seed_np: {seed_np}')
     if sm:
         mutate = mutate_structured
     else:
@@ -618,9 +615,8 @@ def samfeo(
 
 def samfeo_structure(target, f, steps, k, t=1, check_mfe=True, sm=True, freq_print=FREQ_PRINT, initial_list=None):
     start_time = time.time()
-    global seed_np
-    np.random.seed(seed_np)
-    print(f"seed_np: {seed_np}")
+    np.random.seed(SEED_RANDOM)
+    print(f"SEED_RANDOM: {SEED_RANDOM}")
     if sm:
         mutate = mutate_structured
     else:
@@ -879,8 +875,8 @@ def design_parallel(path_txt, name, func, num_step, k, t, seed=None):
             "mfe_list",
             "umfe_list",
         )
-    label = "e" if "easy" in path_motifs else "h"
-    label += str(size_motifs)
+    label = "e" if "easy" in PATH_MOTIFS else "h"
+    label += str(SIZE_MOTIFS)
     if RESCORE:
         label += "_rescore"
     else:
@@ -1262,7 +1258,7 @@ def design_pipeline(name, y, seed=None):  # divide, conquer and combine
     print(f"test seed: {seed}")
 
     # divide
-    motif_tree = decompose(y, selected_motifs)
+    motif_tree = decompose(y, MOTIFS_SELECTED)
     for motif_node in motif_tree.preorder():
         motif_node.structure = y
 
@@ -1342,7 +1338,7 @@ def test_design():
     y = ".....(.((((..(((((........)))))..(((.(((.(((((.....))))).((((....)))).))))))..)))).)...................."
     print("test structure:", y)
 
-    k_best, log, mfe_list, umfe_list, dist_best, ned_best, prob_best, elapsed_time = design_pipeline("test", y, seed=seed_np)
+    k_best, log, mfe_list, umfe_list, dist_best, ned_best, prob_best, elapsed_time = design_pipeline("test", y, seed=SEED_RANDOM)
 
     rna_best = max(k_best)
     obj = -rna_best.score
@@ -1352,7 +1348,7 @@ def test_design():
 
 
 def online_design(structure):
-    k_best, log, mfe_list, umfe_list, dist_best, ned_best, prob_best, elapsed_time = design_pipeline("test", structure, seed=seed_np)
+    k_best, log, mfe_list, umfe_list, dist_best, ned_best, prob_best, elapsed_time = design_pipeline("test", structure, seed=SEED_RANDOM)
     print("k_best:", k_best)
     ned_best = float(ned_best[0]), ned_best[1]
     prob_best = float(1 - prob_best[0]), prob_best[1]
@@ -1381,15 +1377,16 @@ def online_design(structure):
 
 
 def configure_global():
-    global seed_np
-    seed_np = 2020
-    np.random.seed(seed_np)
 
-    global selected_motifs, path_motifs, size_motifs, f_obj, LOG, STAY, WORKER_COUNT, BATCH_SIZE
-    path_motifs = args.motif_path
-    size_motifs = args.motif_size
-    selected_motifs = get_selected_motifs(path_motifs, size_motifs)
-    print(f"Total {len(selected_motifs)} motifs loaded from {path_motifs} with size >= {size_motifs}")
+    global SEED_RANDOM, MOTIFS_SELECTED, PATH_MOTIFS, SIZE_MOTIFS, f_obj, LOG, STAY, WORKER_COUNT, BATCH_SIZE
+
+    SEED_RANDOM = 2020
+    np.random.seed(SEED_RANDOM)
+    
+    PATH_MOTIFS = args.motif_path
+    SIZE_MOTIFS = args.motif_size
+    MOTIFS_SELECTED = get_selected_motifs(PATH_MOTIFS, SIZE_MOTIFS)
+    print(f"Total {len(MOTIFS_SELECTED)} motifs loaded from {PATH_MOTIFS} with size >= {SIZE_MOTIFS}")
     LOG = args.log
     STAY = args.stay
     WORKER_COUNT = args.worker_count
@@ -1461,8 +1458,8 @@ if __name__ == "__main__":
         META_DATA['runs'] = []
         name_input = os.path.splitext(os.path.basename(args.path))[0]
         for i in range(args.repeat):
-            seed_np = 2020 + (i + args.start) * 2021
-            np.random.seed(seed_np)
+            SEED_RANDOM = 2020 + (i + args.start) * 2021
+            np.random.seed(SEED_RANDOM)
             suffix = f"{i+args.start}"
             path_output = design_parallel(
                 args.path,
@@ -1471,9 +1468,9 @@ if __name__ == "__main__":
                 args.step,
                 k=args.k,
                 t=args.t,
-                seed=seed_np,
+                seed=SEED_RANDOM,
             )
-            META_DATA['runs'].append({'seed': seed_np, 'output_file': path_output})
+            META_DATA['runs'].append({'seed': SEED_RANDOM, 'output_file': path_output})
             # save meta data
             with open(path_meta, 'w') as f_meta:
                 json.dump(META_DATA, f_meta, indent=4)
