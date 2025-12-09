@@ -1,13 +1,28 @@
 # FastDesign
 Fast RNA Design via Motif-level Divide-Conquer-Combine and Structure-level Rival Search
 
-## Dependencies
-```
-python 3.11
-pip install -r requirements.txt
-```
+## Installation
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/shanry/FastDesign.git
+    cd FastDesign
+    ```
 
-## Test
+2.  **Install dependencies:**
+    This project is developed using Python 3.11, and should also work for other Python versions.
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Optional: Enable Rival Search**
+    To enable structure-level rival search for boosting MFE-based metrics, download and build the [RNA-Undesign](https://github.com/shanry/RNA-Undesign/tree/main) repository.
+
+    Then, set the `PATH_UNDESIGN` environment variable:
+    ```bash
+    export PATH_UNDESIGN=/path/to/RNA-Undesign
+    ```
+
+## Testing
 ```
 pytest main.py -s
 ```
@@ -22,13 +37,18 @@ Then set the environment variable PATH_UNDESIGN:
 export PATH_UNDESIGN=path/to/RNA-Undesign
 ```
 
-## Run from the Command Line
+## Quick Start
+
+You can run FastDesign directly from the command line.
+
+**Fast Version:**
+```bash
+echo ".((((((((((..((((......((((((((.......)))))))).(((..(((((.....)))).)..)))))))....))))))))))" | python main.py --online
 ```
-echo ".((((((((((..((((......((((((((.......)))))))).(((..(((((.....)))).)..)))))))....))))))))))" | python main.py --online  # fast version
-```
-or
-```
-echo ".((((((((((..((((......((((((((.......)))))))).(((..(((((.....)))).)..)))))))....))))))))))" | python main.py --online --poststep 2500  # full version
+
+**Full Version:**
+```bash
+echo ".((((((((((..((((......((((((((.......)))))))).(((..(((((.....)))).)..)))))))....))))))))))" | python main.py --online --poststep 2500
 ```
 
 ## Main Parameters
@@ -61,12 +81,7 @@ The primary command-line parameters are:
   Beam size for cubic pruning. For each node, the top `k_prune` candidate designs are retained during search.
 
 ## Experiment Replication
-The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip, Eterna100_fast.zip) are available at: https://drive.google.com/drive/u/0/folders/12A2PhjEMSfbsqS9-matxi5O9RDWBVr2g.
-
-To begin, navigate to the repository directory:
-```
-cd FastDesign/
-```
+The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip, Eterna100_fast.zip) are available on [Google Drive](https://drive.google.com/drive/u/0/folders/12A2PhjEMSfbsqS9-matxi5O9RDWBVr2g).
 
 ### Fast Version
 Run
