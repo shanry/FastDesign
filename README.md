@@ -27,16 +27,6 @@ Fast RNA Design via Motif-level Divide-Conquer-Combine and Structure-level Rival
 pytest main.py -s
 ```
 
-### Optional: Enable Rival Search (for boosting MFE-based metrics)
-To enable structure-level rival search, download and build the RNA-Undesign repository:
-
-https://github.com/shanry/RNA-Undesign/tree/main
-
-Then set the environment variable PATH_UNDESIGN:
-```
-export PATH_UNDESIGN=path/to/RNA-Undesign
-```
-
 ## Quick Start
 
 You can run FastDesign directly from the command line.
