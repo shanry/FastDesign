@@ -70,12 +70,17 @@ The primary command-line parameters are:
 - **`--k_prune`**:  
   Beam size for cubic pruning. For each node, the top `k_prune` candidate designs are retained during search.
 
+- **`--motif_path`**:  
+  Path to easy-to-design motifs.
+
 ## Experiment Replication
-The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip, Eterna100_fast.zip) are available on [Google Drive](https://drive.google.com/drive/u/0/folders/12A2PhjEMSfbsqS9-matxi5O9RDWBVr2g).
+The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip, Eterna100_fast.zip, 16SMFE_fast.zip) are available on [Google Drive](https://drive.google.com/drive/u/0/folders/12A2PhjEMSfbsqS9-matxi5O9RDWBVr2g).
 
 ### Fast Version
 ```bash
 python main.py --path data/rnasolo764.txt --step 5000 --poststep 0 --batch_size 200 --worker_count 20 --repeat 5
+python main.py --path data/eterna100.txt --step 5000 --poststep 0 --batch_size 50 --worker_count 20 --repeat 5
+python main.py --path data/16s.txt --step 5000 --poststep 0 --batch_size 10 --worker_count 10 --repeat 5 --motif_path data/helix_motifs.txt
 ```
 This runs 5 repeated experiments and produces 5 CSV files plus a `meta_data.json` file under: 
 ```results/output_timestamp/```
@@ -97,6 +102,7 @@ This generates improved MFE and uMFE results and saves them to:
 ### Full Version
 ```bash
 python main.py --path data/rnasolo764.txt --step 5000 --poststep 2500 --batch_size 200 --worker_count 20 --repeat 5
+python main.py --path data/eterna100.txt --step 5000 --poststep 2500 --batch_size 50 --worker_count 20 --repeat 5
 ```
 As with the fast version, this generates 5 CSV files and a `meta_data.json` file in: `results/output_timestamp/`
 
