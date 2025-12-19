@@ -1371,9 +1371,11 @@ def online_design(structure):
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     id_random = random.randint(0, int(1e7))
     filename = f"results_{timestamp}_{id_random}.json"
+    results["output_file"] = filename
     with open(filename, "w") as f:
         json.dump(results, f)
     print(f"Results saved to {filename}")
+    return results
 
 
 def configure_global():
