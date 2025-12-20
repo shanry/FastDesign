@@ -80,7 +80,7 @@ The replicatable results (RNAsolo_full.zip, RNAsolo_fast.zip, Eterna100_full.zip
 ```bash
 python main.py --path data/rnasolo764.txt --step 5000 --poststep 0 --batch_size 200 --worker_count 20 --repeat 5
 python main.py --path data/eterna100.txt --step 5000 --poststep 0 --batch_size 50 --worker_count 20 --repeat 5
-python main.py --path data/16s.txt --step 5000 --poststep 0 --batch_size 10 --worker_count 10 --repeat 5 --motif_path data/helix_motifs.txt
+python main.py --path data/16s.txt --step 5000 --poststep 0 --batch_size 10 --worker_count 10 --repeat 5 --motif_path data/helix_motifs.txt --k_prune 20
 ```
 This runs 5 repeated experiments and produces 5 CSV files plus a `meta_data.json` file under: 
 ```results/output_timestamp/```
