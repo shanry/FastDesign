@@ -1,18 +1,17 @@
+import argparse
+import heapq
+import json
+import multiprocessing
 import os
+import random
 import sys
 import time
-import copy
 from datetime import datetime
-import random
-import json
-import heapq
-import argparse
-
 from multiprocessing import Pool
+from decimal import Decimal, getcontext
 
 import numpy as np
 import pandas as pd
-from pyparsing import Dict
 
 from utils.vienna import position_ed_pd_mfe, position_ed_ned_mfe, mfe, position_ed_pd_mfe_v0
 from utils.structure import (
@@ -22,16 +21,11 @@ from utils.structure import (
 )
 from utils.structure import len_motif, pairs_match
 from utils.constants import P1, P2, U1, U2
+from utils.motif import MotifNode, decompose, get_selected_motifs
 
-from decimal import Decimal, getcontext
 
 getcontext().prec = 200
-
-import multiprocessing
-
 multiprocessing.set_start_method("fork")
-
-from utils.motif import MotifNode, decompose, get_selected_motifs
 
 
 name2pair = {
@@ -833,8 +827,6 @@ def samfeo_structure(target, f, steps, k, t=1, check_mfe=True, sm=True, freq_pri
 
 # structure design with multiple processing
 def design_parallel(path_txt, name, func, num_step, k, t, seed=None):
-    from multiprocessing import Pool
-
     print("BATCH_SIZE:", BATCH_SIZE)
     print("WORKER_COUNT:", WORKER_COUNT)
     targets = []
@@ -1048,7 +1040,6 @@ def combine_designs_kbest_pruning(
     node,
     seed=None
 ):  # get k-best designs by combining k-best designs from children, pruning according to score and distance
-    from itertools import product
     assert node.design_list, "The node must have a design."
     design_self = node.design_list
     x_sample = design_self[0].sequence  # take the first design from the node
