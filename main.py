@@ -1334,6 +1334,12 @@ def test_design():
     rna_best = max(k_best)
     obj = -rna_best.score
     print("ensemble objective: ", obj)
+    best_dist = max(dist_best[0], 0)  # -2 represent unique MFE, set to 0 for reporting the real distance
+    dist_best = (best_dist, dist_best[1])
+    prob_best = float(1 - prob_best[0]), prob_best[1]
+    print("best distance: ", dist_best)
+    print("best ned: ", ned_best)
+    print("best probability defect: ", prob_best)
     seq = rna_best.seq
     assert seq == "AGAAACGGCCCAAGGACCGAACUGAAGGUCCAAGCGAGCCAGCGCCGAAAAGGCGCAGCCCUCAUGGGCAGGCCGCAAGGGUGGGAAAAAAAAAAGAAAAGAGA", f"seq is not right: {seq}"
 
@@ -1343,6 +1349,8 @@ def online_design(structure):
     print("k_best:", k_best)
     ned_best = float(ned_best[0]), ned_best[1]
     prob_best = float(1 - prob_best[0]), prob_best[1]
+    best_dist = max(dist_best[0], 0)  # -2 represent unique MFE, set to 0 for reporting the real distance
+    dist_best = (best_dist, dist_best[1])
     results = {
                 "target": structure,
                 "mfe_list": mfe_list,
