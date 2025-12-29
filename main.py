@@ -83,12 +83,12 @@ SEED_RANDOM = None
 class RNAStructure:
 
     def __init__(
-        self, seq, score, v=None, v_list=None
-    ):  # v_list: positional NED, v: objective value, socore: used for priority queue
+        self, seq, score, objective=None, defect_list=None
+    ):  # defect_list: positional NED, objective: objective value, score: used for priority queue
         self.seq = seq
-        self.score = score
-        self.v = v
-        self.v_list = v_list
+        self.score = score  # the greater the score, the better the design quality; usally take the negative value of objective
+        self.objective = objective  # objective value, the lower the better the design quality
+        self.defect_list = defect_list  # positional ensemble defect
 
     def __gt__(self, other):
         return self.score > other.score
@@ -287,9 +287,9 @@ def mutate_unpair(nuc_i, exclude=False):
 
 
 # traditional mutation
-def mutate_tradition(seq, pairs, v, v_list, T, pairs_dg=None):
-    v_list = [v / T for v in v_list]
-    probs = np.exp(v_list) / sum(np.exp(v_list))
+def mutate_tradition(seq, pairs, defect_list, T, pairs_dg=None):
+    scaled_defects = [value / T for value in defect_list]
+    probs = np.exp(scaled_defects) / sum(np.exp(scaled_defects))
     index = np.random.choice(list(range(len(seq))), p=probs)
     seq_next = [nuc for nuc in seq]
     if index in pairs:
@@ -307,9 +307,9 @@ def mutate_tradition(seq, pairs, v, v_list, T, pairs_dg=None):
 
 
 # structured mutation
-def mutate_structured(seq, pairs, v, v_list, T):
-    v_list = [v / T for v in v_list]
-    probs = np.exp(v_list) / sum(np.exp(v_list))
+def mutate_structured(seq, pairs, defect_list, T):
+    scaled_defects = [value / T for value in defect_list]
+    probs = np.exp(scaled_defects) / sum(np.exp(scaled_defects))
     index = np.random.choice(list(range(len(seq))), p=probs)
     pairs_mt = []
     unpairs_mt = []
@@ -414,7 +414,7 @@ def samfeo(
         positional_ensemble_defect, objective, suboptimal_structure_list = f(
             sequence, target, constraint
         )  # suboptimal_structure_list: (multiple) MFE structures by subopt of ViennaRNA
-        rna_struct = RNAStructure(seq=sequence, score=-objective, v=objective, v_list=positional_ensemble_defect)
+        rna_struct = RNAStructure(seq=sequence, score=-objective, objective=objective, defect_list=positional_ensemble_defect)
         rna_struct.dist = min(
             [struct_dist(target, suboptimal_structure) for suboptimal_structure in suboptimal_structure_list]
         )
@@ -440,7 +440,7 @@ def samfeo(
     heapq.heapify(k_best)
     for i, rna_struct in enumerate(k_best):
         print(i, rna_struct)
-        log.append(rna_struct.v)
+        log.append(rna_struct.objective)
         if rna_struct.dist == 0:  # MFE solution
             mfe_list.append(rna_struct.seq)
         if rna_struct.dist == 0 and rna_struct.subcount == 1:  # UMFE solution
@@ -472,7 +472,7 @@ def samfeo(
             p = np.random.choice(k_best)
             raise e
         # position sampling and mutation
-        seq_next = mutate(p.seq, pairs, p.v, p.v_list, t)
+        seq_next = mutate(p.seq, pairs, p.defect_list, t)
         seq_next = add_constraint(seq_next, constraint)
         num_repeat = 0
         while seq_next in history:
@@ -485,7 +485,7 @@ def samfeo(
                 print(e)
                 print("probs_boltzmann_1:", probs_boltzmann_1)
                 p = np.random.choice(k_best)
-            seq_next = mutate(p.seq, pairs, p.v, p.v_list, t)
+            seq_next = mutate(p.seq, pairs, p.defect_list, t)
             seq_next = add_constraint(seq_next, constraint)
         if num_repeat > len(target) * MAX_REPEAT:
             print(f"num_repeat: {num_repeat} > {len(target)*MAX_REPEAT} for {motif}")
@@ -532,10 +532,15 @@ def samfeo(
             ned_best = (ned_next, seq_next)
 
         # update priority queue(multi-frontier)
-        rna_struct_next = RNAStructure(seq_next, -objective_next, objective_next, positional_ensemble_defect_next)
-        if rna_struct_next.v <= p.v:
+        rna_struct_next = RNAStructure(
+            seq=seq_next,
+            score=-objective_next,
+            objective=objective_next,
+            defect_list=positional_ensemble_defect_next,
+        )
+        if rna_struct_next.objective <= p.objective:
             seq_list.append(
-                (p.seq, rna_struct_next.seq, str(p.v), str(rna_struct_next.v))
+                (p.seq, rna_struct_next.seq, str(p.objective), str(rna_struct_next.objective))
             )
 
         if len(k_best) < k:
@@ -647,7 +652,7 @@ def samfeo_structure(target, f, steps, k, t=1, check_mfe=True, sm=True, freq_pri
             value = prob_defect
         else:
             assert False, "objective function not supported"
-        rna_struct = RNAStructure(seq=sequence, score=-value, v=value, v_list=defect_list)
+        rna_struct = RNAStructure(seq=sequence, score=-value, objective=value, defect_list=defect_list)
         rna_struct.dist = min(
             [struct_dist(target, y_mfe) for y_mfe in y_mfe_list]
         )  # ss: secondary structure
@@ -700,7 +705,7 @@ def samfeo_structure(target, f, steps, k, t=1, check_mfe=True, sm=True, freq_pri
             p = np.random.choice(k_best)
 
         # position sampling and mutation
-        seq_next = mutate(p.seq, pairs, p.v, p.v_list, t)
+        seq_next = mutate(p.seq, pairs, p.defect_list, t)
         num_repeat = 0
         while seq_next in history:
             num_repeat += 1
@@ -716,7 +721,7 @@ def samfeo_structure(target, f, steps, k, t=1, check_mfe=True, sm=True, freq_pri
                 print(target)
                 print("score_list", score_array)
                 raise e
-            seq_next = mutate(p.seq, pairs, p.v, p.v_list, t)
+            seq_next = mutate(p.seq, pairs, p.defect_list, t)
         if num_repeat > len(target) * MAX_REPEAT:
             print(f"num_repeat: {num_repeat} > {len(target)*MAX_REPEAT}")
             break
@@ -772,7 +777,12 @@ def samfeo_structure(target, f, steps, k, t=1, check_mfe=True, sm=True, freq_pri
             value_next = prob_defect_next
         else:
             assert False, "objective function not supported!"
-        rna_struct_next = RNAStructure(seq_next, -value_next, value_next, defect_list_next)
+        rna_struct_next = RNAStructure(
+            seq=seq_next,
+            score=-value_next,
+            objective=value_next,
+            defect_list=defect_list_next,
+        )
 
         if len(k_best) < k:
             heapq.heappush(k_best, rna_struct_next)
@@ -1333,7 +1343,8 @@ def test_design():
 
     rna_best = max(k_best)
     obj = -rna_best.score
-    print("ensemble objective: ", obj)
+    print("objective name: ", objective_name)
+    print("objective value: ", obj)
     best_dist = max(dist_best[0], 0)  # -2 represent unique MFE, set to 0 for reporting the real distance
     dist_best = (best_dist, dist_best[1])
     prob_best = float(1 - prob_best[0]), prob_best[1]
@@ -1346,13 +1357,24 @@ def test_design():
 
 def online_design(structure):
     k_best, log, mfe_list, umfe_list, dist_best, ned_best, prob_best, elapsed_time = design_pipeline("test", structure, seed=SEED_RANDOM)
-    print("k_best:", k_best)
+    kbest_list = []
+    objective_value = float(-max(k_best).score)
+    # convert Decimal to float
+    for rna_struct in k_best:
+        kbest_list.append({"seq": rna_struct.seq, objective_name: objective_value})
     ned_best = float(ned_best[0]), ned_best[1]
     prob_best = float(1 - prob_best[0]), prob_best[1]
     best_dist = max(dist_best[0], 0)  # -2 represent unique MFE, set to 0 for reporting the real distance
     dist_best = (best_dist, dist_best[1])
+    print("design results:")
+    print("k_best:", kbest_list)
+    print("ned_best:", ned_best)
+    print("prob_best:", prob_best)
+    print("dist_best:", dist_best)
+    print("elapsed_time:", elapsed_time)
     results = {
                 "target": structure,
+                "kbest": kbest_list,
                 "mfe_list": mfe_list,
                 "umfe_list": umfe_list,
                 "ned_best": ned_best,
@@ -1360,7 +1382,6 @@ def online_design(structure):
                 "dist_best": dist_best,
                 "time": elapsed_time
             }
-    print("design results:")
     for key, value in results.items():
         if "list" in key:
             # print count
