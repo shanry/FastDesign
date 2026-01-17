@@ -254,7 +254,7 @@ def mfe_booster(df_list, num_threads=None, output_dir="."):
     def argmin_dist(x, y):
         from utils.vienna import subopt
         from utils.structure import struct_dist
-        y_mfe_list = subopt(x)["ss_list"]
+        y_mfe_list = subopt(x)["tuples_of_energy_and_structure"]
         if len(y_mfe_list) == 1:
             _, y_mfe = y_mfe_list[0]
             assert y_mfe != y, f"MFE structure matches target structure, should have been an uMFE solution, {y}, {x}"
