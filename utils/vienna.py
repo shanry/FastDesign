@@ -274,7 +274,7 @@ if __name__ == "__main__":
     print("Vinenna NED:", defect)
     print("Scratch NED:", sum(defect_pos) / len(defect_pos))
     print("Position ED:", sum(defect_pos_2) / len(defect_pos_2))
-    print("subopt:", result_suboptimal)
+    # print("subopt:", result_suboptimal)
 
     x = "UAAUGGCCGCGGAAUCCGC"
     c = "(.................)"
@@ -283,3 +283,29 @@ if __name__ == "__main__":
 
     print(len(x), len(c))
     print("Partition function:", pf)
+
+    print("----------------------")
+
+    x = "GGACCCGAAAGGCGCAC"
+    x = "GGCGUAAAAAUGUCCAC"
+    y = "((.(((....)).)).)"
+    c = "(....(xxxx).....)"
+    # c = "(...............)"
+    print("Sequence:", x)
+    print("Structure:", y)
+
+    energy_x_y = energy(x, y)
+    print("Energy:", energy_x_y)
+
+    pr = prob(x, y, scale=False, constraint=c)
+    print("Probability:", pr)
+
+    subopt_result = subopt(x, constraint=c, e=200)
+    print("Subopt result:", len(subopt_result["tuples_of_energy_and_structure"]))
+
+    pf = partition_function(x, scale=False, constraint=c)
+    print("Partition function with constraint:", pf)
+    
+    # c = "(...............)"
+    # pf = partition_function(x, scale=False, constraint=c)
+    # print("Partition function with constraint:", pf)
