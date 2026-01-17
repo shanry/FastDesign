@@ -1398,9 +1398,30 @@ def online_design(structure):
     return results
 
 
+# call samfeo for online motif design
+def online_motif_design(motif_dotbracket):
+    k_best, log, mfe_list, umfe_list, dist_best, ned_best, seq_list, elapsed_time, best_many = samfeo(
+        motif_dotbracket,
+        f_obj,
+        steps=args.step,
+        k=args.k,
+        t=args.t,
+        check_mfe=not args.nomfe,
+        sm=not args.nosm,
+        seed=SEED_RANDOM
+    )
+    kbest_list = []
+    # objective_value = float(-max(k_best).score)
+    # convert Decimal to float
+    for rna_struct in k_best:
+        objective_value = float(rna_struct.objective)
+        kbest_list.append({"seq": rna_struct.seq, objective_name: objective_value})
+    return kbest_list
+
+
 def configure_global():
 
-    global SEED_RANDOM, MOTIFS_SELECTED, PATH_MOTIFS, SIZE_MOTIFS, f_obj, LOG, STAY, WORKER_COUNT, BATCH_SIZE
+    global SEED_RANDOM, MOTIFS_SELECTED, PATH_MOTIFS, SIZE_MOTIFS, f_obj, LOG, STAY, WORKER_COUNT, BATCH_SIZE, RESCORE, REDESIGN
 
     SEED_RANDOM = 2020
     np.random.seed(SEED_RANDOM)
@@ -1409,10 +1430,14 @@ def configure_global():
     SIZE_MOTIFS = args.motif_size
     MOTIFS_SELECTED = get_selected_motifs(PATH_MOTIFS, SIZE_MOTIFS)
     print(f"Total {len(MOTIFS_SELECTED)} motifs loaded from {PATH_MOTIFS} with size >= {SIZE_MOTIFS}")
+    RESCORE = not args.rawscore
     LOG = args.log
     STAY = args.stay
     WORKER_COUNT = args.worker_count
     BATCH_SIZE = WORKER_COUNT * 2 if args.batch_size is None else args.batch_size
+    # print RESCORE and REDESIGN
+    print(f"RESCORE: {RESCORE}")
+    print(f"REDESIGN: {REDESIGN}")
 
     global name_pair, objective_name, name_input
     name_pair = args.init
@@ -1450,6 +1475,7 @@ if __name__ == "__main__":
     parser.add_argument("--step_redesign", type=int, default=500)  # number of step for redesigning internal nodes when needed
     parser.add_argument("--motif_path", type=str, default="data/easy_motifs.txt")  # path to easy-to-design motifs
     parser.add_argument("--motif_size", type=int, default=3)  # minimum motif cardinality
+    parser.add_argument("--rawscore", action="store_true")  # rescore combined designs
     # parameters for parallel processing
     parser.add_argument("--worker_count", type=int, default=1)
     parser.add_argument("--batch_size", type=int, default=None)
@@ -1457,6 +1483,7 @@ if __name__ == "__main__":
     parser.add_argument("--repeat", type=int, default=1)
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--log", action="store_true")
+    parser.add_argument("-m", "--motif", action="store_true")  # online motif design mode
     parser.add_argument("-o", "--online", action="store_true")
 
     args = parser.parse_args()
@@ -1469,7 +1496,14 @@ if __name__ == "__main__":
         print("online mode:")
         for line in sys.stdin:
             target = line.strip()
-            online_design(structure=target)
+            if args.motif:
+                print("motif design mode:")
+                kbest_list = online_motif_design(target)
+                print("design results:")
+                for item in kbest_list:
+                    print(item)
+            else:
+                online_design(structure=target)
 
     if args.path:
         time_str = time.strftime("%Y%m%d_%H%M%S")
